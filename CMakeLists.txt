@@ -58,6 +58,11 @@ build_root_dictionary(
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+add_library(RootSpy-client STATIC IMPORTED)
+set_target_properties(RootSpy-client PROPERTIES
+  IMPORTED_LOCATION "/daqfs/home/moffit/work/RootSpy-1.3/Linux_RH-x86_64-gcc4.8.5/lib/libRootSpy-client.a"
+  INTERFACE_INCLUDE_DIRECTORIES "/daqfs/home/moffit/work/RootSpy-1.3/Linux_RH-x86_64-gcc4.8.5/include"
+)
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
@@ -73,7 +78,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #
 add_library(panguin-lib SHARED ${sources} ${headers} panguinDict.cxx)
 set_target_properties(panguin-lib PROPERTIES OUTPUT_NAME panguin)
-target_link_libraries(panguin-lib PUBLIC  ROOT::Libraries)
+target_link_libraries(panguin-lib PUBLIC  ROOT::Libraries RootSpy-client)
 
 add_executable(panguin-bin panguin.cc)
 set_target_properties(panguin-bin PROPERTIES OUTPUT_NAME panguin)
