@@ -68,8 +68,19 @@ set_target_properties(RootSpy-client PROPERTIES
 # Cmsg
 add_library(cmsg SHARED IMPORTED)
 set_target_properties(cmsg PROPERTIES
-  IMPORTED_LOCATION "$ENV{CODA_LIB}/libcmsgxx.so"
+  IMPORTED_LOCATION "$ENV{CODA_LIB}/libcmsg.so"
+  INTERFACE_INCLUDE_DIRECTORIES "$ENV{CODA}/common/include"
+)
+
+add_library(cmsgregex SHARED IMPORTED)
+set_target_properties(cmsgregex PROPERTIES
   IMPORTED_LOCATION "$ENV{CODA_LIB}/libcmsgRegex.so"
+  INTERFACE_INCLUDE_DIRECTORIES "$ENV{CODA}/common/include"
+)
+
+add_library(cmsgxx SHARED IMPORTED)
+set_target_properties(cmsgxx PROPERTIES
+  IMPORTED_LOCATION "$ENV{CODA_LIB}/libcmsgxx.so"
   INTERFACE_INCLUDE_DIRECTORIES "$ENV{CODA}/common/include"
 )
 
@@ -88,11 +99,11 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #
 add_library(panguin-lib SHARED ${sources} ${headers} panguinDict.cxx)
 set_target_properties(panguin-lib PROPERTIES OUTPUT_NAME panguin)
-target_link_libraries(panguin-lib PUBLIC  ROOT::Libraries RootSpy-client cmsg)
+target_link_libraries(panguin-lib PUBLIC  ROOT::Libraries cmsg cmsgregex cmsgxx RootSpy-client)
 
 add_executable(panguin-bin panguin.cc)
 set_target_properties(panguin-bin PROPERTIES OUTPUT_NAME panguin)
-target_link_libraries(panguin-bin panguin-lib)
+target_link_libraries(panguin-bin cmsg cmsgregex cmsgxx panguin-lib )
 
 #----------------------------------------------------------------------------
 #

@@ -30,8 +30,15 @@
 #include "TGraph.h"
 #include "TGaxis.h"
 #include <map>
+#include "RootSpy.h"
+#include "rs_info.h"
+#include "rs_cmsg.h"
+
 
 #define OLDTIMERUPDATE
+
+extern rs_info *RS_INFO;
+extern rs_cmsg *RS_CMSG;
 
 using namespace std;
 
@@ -889,6 +896,57 @@ Int_t OnlineGUI::OpenRootFile() {
   return 0;
 
 }
+
+// Create the RootSpy objects
+Int_t OnlineGUI::OpenRootSpy()
+{
+  static int once = 0;
+
+  if(once == 0)
+    {
+      // Makes a Mutex to lock / unlock Root Global
+      ROOT_MUTEX = new pthread_rwlock_t;
+      pthread_rwlock_init(ROOT_MUTEX, NULL);
+
+      RS_INFO = new rs_info();
+
+      string ROOTSPY_UDL = "cMsg://127.0.0.1/cMsg/rootspy";
+      string CMSG_NAME = "<not set here. see below>";
+
+      RS_CMSG = new rs_cmsg(ROOTSPY_UDL, CMSG_NAME);
+
+      once++;
+    }
+
+  RS_INFO->Lock();
+  map<string,server_info_t>::iterator iter = RS_INFO->servers.begin();
+  for(; iter!=RS_INFO->servers.end(); iter++){
+    string servername = iter->first;
+    cout << "servername: " << servername << endl;
+    if(servername!=""){
+      RS_CMSG->RequestHists(servername);
+    }
+  }
+  RS_INFO->Unlock();
+  sleep(1);
+
+  RS_INFO->Lock();
+
+  map<string, hdef_t>::iterator hists_iter = RS_INFO->histdefs.begin();
+
+  for(; hists_iter != RS_INFO->histdefs.end(); hists_iter++) {
+    cout << "Name: " << hists_iter->first << endl;
+  }
+  // When the timer is called, do not attempt to display.
+  RS_INFO->Unlock();
+
+	// RS_CMSG->hist_default_active = false;
+  // RS_CMSG->program_name = "RootSpy";
+  // RS_CMSG->verbose = VERBOSE;
+
+}
+
+
 void OnlineGUI::SaveImage(TObject* o,std::map<TString,TString> &command)
 {
   if(this->fSaveImages)

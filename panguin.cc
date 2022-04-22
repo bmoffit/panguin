@@ -5,6 +5,14 @@
 #include <TSystem.h>
 #include <iostream>
 #include <ctime>
+#include <pthread.h>
+#include "RootSpy.h"
+#include "rs_info.h"
+#include "rs_cmsg.h"
+
+rs_info *RS_INFO = NULL;
+rs_cmsg *RS_CMSG = NULL;
+pthread_rwlock_t *ROOT_MUTEX = NULL;
 
 using namespace std;
 
@@ -12,9 +20,11 @@ clock_t tStart;
 void Usage();
 void online(TString type="standard",UInt_t run=0,Bool_t printonly=kFALSE, int verbosity=0, Bool_t saveImages=kFALSE);
 
+
+
 int main(int argc, char **argv){
   tStart = clock();
- 
+
   TString type="default";
   UInt_t run=0;
   Bool_t printonly=kFALSE;
@@ -71,7 +81,7 @@ int main(int argc, char **argv){
   if( !gSystem->AccessPathName("~/rootlogon.C") ){
     gROOT->ProcessLine(".x ~/rootlogon.C");
   }
-  
+
   online(type,run,printonly,verbosity,saveImages);
   theApp.Run();
 
@@ -120,4 +130,3 @@ void Usage(){
   cerr << "  -P : Only Print Summary Plots" << endl;
   cerr << endl;
 }
-
