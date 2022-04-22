@@ -58,11 +58,21 @@ build_root_dictionary(
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+# RootSpy
 add_library(RootSpy-client STATIC IMPORTED)
 set_target_properties(RootSpy-client PROPERTIES
   IMPORTED_LOCATION "/daqfs/home/moffit/work/RootSpy-1.3/Linux_RH-x86_64-gcc4.8.5/lib/libRootSpy-client.a"
   INTERFACE_INCLUDE_DIRECTORIES "/daqfs/home/moffit/work/RootSpy-1.3/Linux_RH-x86_64-gcc4.8.5/include"
 )
+
+# Cmsg
+add_library(cmsg SHARED IMPORTED)
+set_target_properties(cmsg PROPERTIES
+  IMPORTED_LOCATION "$ENV{CODA_LIB}/libcmsgxx.so"
+  IMPORTED_LOCATION "$ENV{CODA_LIB}/libcmsgRegex.so"
+  INTERFACE_INCLUDE_DIRECTORIES "$ENV{CODA}/common/include"
+)
+
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
@@ -78,7 +88,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #
 add_library(panguin-lib SHARED ${sources} ${headers} panguinDict.cxx)
 set_target_properties(panguin-lib PROPERTIES OUTPUT_NAME panguin)
-target_link_libraries(panguin-lib PUBLIC  ROOT::Libraries RootSpy-client)
+target_link_libraries(panguin-lib PUBLIC  ROOT::Libraries RootSpy-client cmsg)
 
 add_executable(panguin-bin panguin.cc)
 set_target_properties(panguin-bin PROPERTIES OUTPUT_NAME panguin)
