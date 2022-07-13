@@ -1018,31 +1018,45 @@ void OnlineGUI::RSDraw(std::map<TString,TString> &command) {
   // FIXME: should eventually put this in the call TO RSDraw(...)
   cout << __func__ << ": here" << endl;
   // Find the object in RS_INFO and draw it
-  RS_INFO->Lock();
-  // hdef_t histodef = RS_INFO->histdefs[RS_INFO->current.hnamepath];
-  map<string, hdef_t>::iterator hists_iter = RS_INFO->histdefs.begin();
-  // FIXME: This procedure currently results in
-  //  Name: //E
-  //  Found it
-  //  terminate called after throwing an instance of 'std::logic_error'
-  //   what():  basic_string::_S_construct null not valid
 
-  for(; hists_iter != RS_INFO->histdefs.end(); hists_iter++) {
-    cout << "Name: " << hists_iter->first << endl;
-    if(command["variable"].Contains(hists_iter->first))
+
+  RS_CMSG->PingServers();
+
+
+  const char *hnamepath = Form("//%s",command["variable"].Data());
+
+  map<string,server_info_t> &servers = RS_INFO->servers;
+  map<string,server_info_t>::iterator iter;
+
+  RS_INFO->Lock();
+  // Loop over all servers, requesting the histogram from each
+  for(iter=servers.begin(); iter!=servers.end(); iter++){
+
+    string server = iter->first;
+    cout << "Requesting histogram: " << hnamepath << " from " << server << endl;
+    RS_CMSG->RequestHistogram(server, string(hnamepath));
+  }
+  RS_INFO->Unlock();
+
+  // Wait a second for the servers to respond
+  // cout << "waiting for all servers to respond ..." << endl;
+  sleep(1);
+
+  // Get the summed histogram
+  if(RS_INFO->histdefs.find(hnamepath) != RS_INFO->histdefs.end()){
+    hdef_t &hdef = RS_INFO->histdefs[hnamepath];
+    TH1 *found_hist = hdef.sum_hist;
+
+    cout << "Found it: " << endl;
+
+    if(found_hist)
       {
-	cout << "Found it" << endl;
-	// Determine dimensionality of histogram
-	TH1* found_hist = hists_iter->second.hists[0].hist;
-	if(!found_hist)
-	  {
-	    cout << "its null" << endl;
-	  }
-	TString hist_type = hists_iter->second.hists[0].hist->ClassName();
+	TString hist_type = found_hist->ClassName();
+	cout << " hist_type " << hist_type << endl;
 
 	if(hist_type.Contains("TH1")) {
 
-	  mytemp1d = (TH1D*)hists_iter->second.hists[0].sum_hist;
+	  mytemp1d = (TH1D*)found_hist;
 
 	  if(mytemp1d->GetEntries() == 0) {
 	    BadDraw("Empty Histogram");
@@ -1054,7 +1068,7 @@ void OnlineGUI::RSDraw(std::map<TString,TString> &command) {
 	  }
 
 	} else if (hist_type.Contains("TH2")) {
-	  mytemp2d = (TH2D*)hists_iter->second.hists[0].hist;
+	  mytemp2d = (TH2D*)found_hist;
 
 	  if(mytemp1d->GetEntries() == 0) {
 	    BadDraw("Empty Histogram");
@@ -1067,12 +1081,14 @@ void OnlineGUI::RSDraw(std::map<TString,TString> &command) {
 	} else {
 	  BadDraw("IDK");
 	}
-      } else {
+      }else {
       BadDraw(command["variable"]+" Not Found");
     }
+
+  } else {
+    BadDraw(command["variable"]+" Not Found");
   }
 
-  RS_INFO->Unlock();
 
 }
 
