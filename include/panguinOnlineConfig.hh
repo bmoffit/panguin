@@ -25,11 +25,12 @@ private:
   TString protorootfile; // Prototype for getting the rootfilename
   TString guicolor; // User's choice of background color
   TString plotsdir; // Where to store sample plots.. automatically stored as .jpg's).
-  std::vector < std::pair <UInt_t,UInt_t> > pageInfo; 
-  std::vector <TCut> cutList; 
+  std::vector < std::pair <UInt_t,UInt_t> > pageInfo;
+  std::vector <TCut> cutList;
   std::vector <UInt_t> GetDrawIndex(UInt_t);
   Bool_t fFoundCfg;
   Bool_t fMonitor;
+  Bool_t fRSMonitor;
   int fVerbosity;
   int hist2D_nBinsX,hist2D_nBinsY;
   TString fPlotFormat;
@@ -64,6 +65,7 @@ public:
   std::vector <TString> SplitString(TString,TString);
   void OverrideRootFile(UInt_t);
   Bool_t IsMonitor() { return fMonitor; };
+  Bool_t IsRSMonitor() { return fRSMonitor; };
 };
 
 #endif //panguinOnlineConfig_h

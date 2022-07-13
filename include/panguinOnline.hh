@@ -71,7 +71,7 @@ private:
   TH2D                             *mytemp2d_golden;
   TH3D                             *mytemp3d_golden;
 
-  int fVerbosity;
+  int fVerbosity = 4;
 
 public:
   OnlineGUI(OnlineConfig&, Bool_t,int, Bool_t);
@@ -92,11 +92,13 @@ public:
   UInt_t GetTreeIndexFromName(TString);
   void TreeDraw(std::map<TString,TString> &command);
   void HistDraw(std::map<TString,TString> &command);
+  void RSDraw(std::map<TString,TString> &command);
   void MacroDraw(std::map<TString,TString> &command);
   void LoadDraw(std::map<TString,TString> &command);
   void LoadLib(std::map<TString,TString> &command);
   void DoDrawClear();
   void TimerUpdate();
+  void RootSpyUpdate();
   void UpdateCurrentTime();  // update current time
   void BadDraw(TString);
   void CheckRootFile();
